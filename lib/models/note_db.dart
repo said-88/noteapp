@@ -50,8 +50,25 @@ class NoteDb extends ChangeNotifier {
   
     // Ordenar en memoria por `id` en orden ascendente
     currentNotes.sort((a, b) => a.id.compareTo(b.id));
-  
 
+    notifyListeners();
+  }
+
+  void updateNoteOrder(List<Note> reorderedNotes) {
+    // Actualizar el orden de las notas en la base de datos
+    // isar.writeTxn(() {
+    //   for (var i = 0; i < reorderedNotes.length; i++) {
+    //     final note = reorderedNotes[i];
+    //     note.id = i;
+    //     isar.notes.put(note);
+    //   }
+    // });
+
+    // // Actualizar la lista de notas
+    // fetchNotes();
+
+    currentNotes = reorderedNotes;
+    notifyListeners();
   }
 
   Note? getLastAddNote() {

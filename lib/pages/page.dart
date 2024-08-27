@@ -48,8 +48,6 @@ class _PageState extends State<MyPage> {
     textFocusNode.removeListener(_focusListener);
     titleFocusNode.dispose();
     textFocusNode.dispose();
-    titleFocusNode.dispose();
-    textFocusNode.dispose();
     super.dispose();
   }
 
@@ -139,15 +137,17 @@ class _PageState extends State<MyPage> {
           const SizedBox(height: 16),
 
           if (!noteSaved || isFocused)
-            Padding(
-              padding: const EdgeInsets.only(left: 130.0),
-              child: ElevatedButton(
-                onPressed: saveNote,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ElevatedButton(
+                  onPressed: saveNote,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+                  ),
+                  child: const Text('Save Note'),
                 ),
-                child: const Text('Save Note'),
               ),
             ),
         ],

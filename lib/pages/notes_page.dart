@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:myapp/components/draggable_note.dart';
 import 'package:myapp/components/drawer.dart';
-import 'package:myapp/components/note_tile.dart';
+import 'package:myapp/models/note_db.dart';
+import 'package:flutter/material.dart';
 import 'package:myapp/models/note.dart';
 import 'package:provider/provider.dart';
-import 'package:myapp/models/note_db.dart';
 import 'package:myapp/pages/page.dart';
+import 'dart:ui';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -70,6 +71,35 @@ class _NotesPageState extends State<NotesPage> {
     final noteDb = context.watch<NoteDb>();
 
     List<Note> currentNotes = noteDb.currentNotes;
+    // 
+    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+      return AnimatedBuilder(animation: animation, builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 10, animValue)!;
+
+        return Material(
+          elevation: elevation,
+          color: Theme.of(context).colorScheme.primary,
+          shadowColor: Theme.of(context).colorScheme.secondary,          
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow:  [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.secondary, 
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: child,
+          ),
+        );
+      },
+        child: child,
+      );
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -107,26 +137,45 @@ class _NotesPageState extends State<NotesPage> {
             ),
 
             // list of notes
-            Expanded(
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                itemCount: currentNotes.length,
-                itemBuilder: (context, index) {
-                  final note = currentNotes[index];
-
-                  return NoteTile(
-                    title: note.title,
-                    content: note.content,
-                    onEditPressed: () => updateNotes(note),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyPage(note: note)),
-                      );
-                    },
-                    onDeletePressed: () => deleteNotes(note.id),
-                  );
-                },
+            Flexible(
+              child: Scrollbar(
+                thickness: 10,
+                radius: const Radius.circular(10),
+                child: ReorderableListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  proxyDecorator: proxyDecorator,
+                  onReorder: (oldIndex, newIndex) {
+                   setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex--;
+                      }
+                      final Note item = currentNotes.removeAt(oldIndex);
+                      currentNotes.insert(newIndex, item);
+                   });
+                  },
+                
+                  children: [
+                    for (final note in currentNotes)
+                      ReorderableDragStartListener(
+                        index: currentNotes.indexOf(note),
+                        key: ValueKey(note.id),
+                        child: DraggableNotile(
+                          key: ValueKey(note.id),
+                          title: note.title,
+                          content: note.content,
+                          onEditPressed: () => updateNotes(note),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyPage(note: note)),
+                            );
+                          },
+                          onDeletePressed: () => deleteNotes(note.id),
+                          isDragging: false,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/components/drawer.dart';
-import 'package:myapp/components/note_tile.dart';
+import 'package:myapp/components/draggable_note.dart';
 import 'package:myapp/models/note.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/models/note_db.dart';
@@ -138,11 +138,12 @@ class _AllNotesState extends State<AllNotes> {
                 itemBuilder: (context, index) {
                   final note = currentNotes[index];
 
-                  return NoteTile(
+                  return DraggableNotile(
                     title: note.title,
                     content: note.content,
                     onEditPressed: () => updateNotes(note),
                     onDeletePressed: () => deleteNotes(note.id),
+                    isDragging: false,
                   );
                 },
               ),
